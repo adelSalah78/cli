@@ -61,7 +61,7 @@
 
         <!-- Carbyne Stack dependency versions -->
         <amphora.version>0.1-SNAPSHOT-4205214333-22-2fa009a</amphora.version>
-        <castor.version>0.1-SNAPSHOT-4191841095-22-1721229</castor.version>
+        <castor.version>0.1-SNAPSHOT</castor.version>
         <ephemeral.version>0.1-SNAPSHOT-2804677120-20-efc7f8d</ephemeral.version>
 
         <!-- External dependency versions -->
@@ -98,11 +98,6 @@
         <dependency>
             <groupId>io.carbynestack</groupId>
             <artifactId>castor-java-client</artifactId>
-            <version>${castor.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.carbynestack</groupId>
-            <artifactId>castor-upload-java-client</artifactId>
             <version>${castor.version}</version>
         </dependency>
         <dependency>

@@ -36,7 +36,7 @@ public class UploadTupleCastorClientCliCommandRunner
       Retry.retry(
           3,
           () -> {
-            castorUploadClient.connectWebSocket(CASTOR_COMMUNICATION_TIMEOUT);
+//            castorUploadClient.connectWebSocket(CASTOR_COMMUNICATION_TIMEOUT);
             log.debug(
                 String.format(
                     "Uploading %d tuples to chunk #%s...",

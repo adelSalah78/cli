@@ -12,6 +12,7 @@ import static io.carbynestack.cli.util.ConsoleReader.readOrDefault;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.carbynestack.amphora.common.AmphoraServiceUri;
 import io.carbynestack.castor.common.CastorServiceUri;
+import io.carbynestack.castor.common.GrpcCastorServiceClientInfo;
 import io.carbynestack.cli.exceptions.CsCliConfigurationException;
 import java.net.URI;
 import java.text.MessageFormat;
@@ -46,6 +47,8 @@ public class VcpConfiguration {
   URI ephemeralServiceUrl;
   String oAuth2clientId;
   URI oAuth2CallbackUrl;
+
+  GrpcCastorServiceClientInfo grpcClientInfo;
 
   VcpConfiguration(int providerNumber) {
     this.providerNumber = providerNumber;
@@ -95,8 +98,24 @@ public class VcpConfiguration {
                   MESSAGES.getString("configuration.request.vcp.oauth2-callback-url"),
                   getActualOAuth2CallbackUrl())));
       oAuth2CallbackUrl = URI.create(readOrDefault(getActualOAuth2CallbackUrl()));
+      fillGrpcInfo();
     } catch (NoSuchElementException | IllegalStateException | IllegalArgumentException e) {
       throw new CsCliConfigurationException(MESSAGES.getString("configuration.failed"), e);
+    }
+  }
+
+  private void fillGrpcInfo(){
+    if(grpcClientInfo == null){
+      grpcClientInfo = new GrpcCastorServiceClientInfo();
+    }
+    grpcClientInfo.setGrpcAddress(readOrDefault(grpcClientInfo.getGrpcAddress()));
+    grpcClientInfo.setGrpcPort(readOrDefault(grpcClientInfo.getGrpcPort()));
+
+    if(grpcClientInfo.getGrpcAddress() == null || grpcClientInfo.getGrpcAddress().equals("")){
+      throw new IllegalArgumentException("You must specify grpc address");
+    }
+    if(grpcClientInfo.getGrpcPort() == null || grpcClientInfo.getGrpcPort().equals("")){
+      throw new IllegalArgumentException("You must specify grpc port");
     }
   }
 
@@ -210,6 +229,17 @@ public class VcpConfiguration {
   @JsonProperty(value = "oauth2CallbackUrl", required = true, index = 16)
   private void setOAuth2CallbackUrl(String oAuth2CallbackUrl) {
     this.oAuth2CallbackUrl = URI.create(oAuth2CallbackUrl);
+  }
+
+
+  @JsonProperty(value = "grpcClientInfo", required = true, index = 17)
+  private void setGrpcClientInfo(GrpcCastorServiceClientInfo grpcClientInfo) {
+    this.grpcClientInfo = grpcClientInfo;
+  }
+
+  @JsonProperty(value = "grpcClientInfo", required = true, index = 17)
+  public GrpcCastorServiceClientInfo getGrpcClientInfo() {
+    return this.grpcClientInfo;
   }
 
   @Override
