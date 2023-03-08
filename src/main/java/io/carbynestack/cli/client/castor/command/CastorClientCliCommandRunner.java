@@ -10,7 +10,6 @@ import io.carbynestack.castor.client.download.CastorIntraVcpClient;
 import io.carbynestack.castor.client.download.DefaultCastorIntraVcpClient;
 import io.carbynestack.castor.client.upload.CastorUploadClient;
 import io.carbynestack.castor.client.upload.DefaultCastorUploadClient;
-import io.carbynestack.castor.client.upload.grpc.GrpcCastorUploadClient;
 import io.carbynestack.castor.common.BearerTokenProvider;
 import io.carbynestack.cli.CsClientCliCommandRunner;
 import io.carbynestack.cli.client.castor.CastorClientCli;
@@ -45,25 +44,17 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
     Configuration configuration = Configuration.getInstance();
     VcpConfiguration vcpConfiguration = configuration.getProvider(config.getId());
     Option<VcpToken> token = getVcpToken(vcpConfiguration);
-      castorUploadClient = new GrpcCastorUploadClient(vcpConfiguration.getGrpcClientInfo());
-    /*castorUploadClient =
+    castorUploadClient =
         config
             .getCustomUploadClientFactory()
-            .map(factory -> Try.of(
-                    ()-> {
-                        CastorUploadClient client = new GrpcCastorUploadClient(vcpConfiguration.getGrpcClientInfo());
-                        return client;
-                    }
-            ))
+            .map(factory -> Try.of(factory::create))
             .getOrElse(
                 Try.of(
                     () -> {
                       DefaultCastorUploadClient.Builder builder =
                           DefaultCastorUploadClient.builder(
-                              vcpConfiguration
-                                  .getCastorServiceUri()
-                                  .getRestServiceUri()
-                                  .toString());
+                              vcpConfiguration.getGrpcClientInfo().getGrpcAddress(),
+                                  vcpConfiguration.getGrpcClientInfo().getGrpcPort());
                       for (File certificateFile :
                           configuration.getTrustedCertificates().stream()
                               .map(Path::toFile)
@@ -87,7 +78,7 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
             .getOrElseThrow(
                 exception ->
                     new CsCliRunnerException(
-                        getMessages().getString("client-instantiation-failed"), exception));*/
+                        getMessages().getString("client-instantiation-failed"), exception));
     castorIntraVcpClient =
         config
             .getCustomIntraVcpClientFactory()
@@ -100,7 +91,8 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
                               vcpConfiguration
                                   .getCastorServiceUri()
                                   .getRestServiceUri()
-                                  .toString());
+                                  .toString(),
+                                  vcpConfiguration.getGrpcClientInfo().getGrpcAddress() + ":" + vcpConfiguration.getGrpcClientInfo().getGrpcPort());
                       KeyStoreUtil.tempKeyStoreForPems(configuration.getTrustedCertificates())
                           .peek(intraVcpClientBuilder::withTrustedCertificate);
                       if (configuration.isNoSslValidation()) {

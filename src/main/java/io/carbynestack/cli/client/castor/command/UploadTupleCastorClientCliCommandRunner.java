@@ -52,8 +52,6 @@ public class UploadTupleCastorClientCliCommandRunner
     } catch (CastorClientException e) {
       log.error(getMessages().getString("upload.log.failure"));
       throw new CsCliRunnerException(e.getMessage(), e);
-    } finally {
-      castorUploadClient.disconnectWebSocket();
     }
   }
 }
