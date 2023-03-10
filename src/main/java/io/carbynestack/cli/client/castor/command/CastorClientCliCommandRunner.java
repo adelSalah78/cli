@@ -51,10 +51,13 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
             .getOrElse(
                 Try.of(
                     () -> {
+                        String[] address_port = vcpConfiguration.getCastorServiceUri().getGrpcServiceUri().split(":");
+                        String address = address_port[0];
+                        String port = address_port[1];
                       DefaultCastorUploadClient.Builder builder =
                           DefaultCastorUploadClient.builder(
-                              vcpConfiguration.getGrpcClientInfo().getGrpcAddress(),
-                                  vcpConfiguration.getGrpcClientInfo().getGrpcPort());
+                              address,
+                                  port);
                       for (File certificateFile :
                           configuration.getTrustedCertificates().stream()
                               .map(Path::toFile)
@@ -87,12 +90,7 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
                 Try.of(
                     () -> {
                       DefaultCastorIntraVcpClient.Builder intraVcpClientBuilder =
-                          DefaultCastorIntraVcpClient.builder(
-                              vcpConfiguration
-                                  .getCastorServiceUri()
-                                  .getRestServiceUri()
-                                  .toString(),
-                                  vcpConfiguration.getGrpcClientInfo().getGrpcAddress() + ":" + vcpConfiguration.getGrpcClientInfo().getGrpcPort());
+                          DefaultCastorIntraVcpClient.builder(vcpConfiguration.getCastorServiceUri().getGrpcServiceUri());
                       KeyStoreUtil.tempKeyStoreForPems(configuration.getTrustedCertificates())
                           .peek(intraVcpClientBuilder::withTrustedCertificate);
                       if (configuration.isNoSslValidation()) {
