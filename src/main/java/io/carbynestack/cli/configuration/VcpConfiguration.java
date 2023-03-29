@@ -11,8 +11,7 @@ import static io.carbynestack.cli.util.ConsoleReader.readOrDefault;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.carbynestack.amphora.common.AmphoraServiceUri;
-import io.carbynestack.castor.common.CastorServiceUri;
-import io.carbynestack.castor.common.GrpcCastorServiceClientInfo;
+import io.carbynestack.castor.common.CastorServiceInfo;
 import io.carbynestack.cli.exceptions.CsCliConfigurationException;
 import java.net.URI;
 import java.text.MessageFormat;
@@ -43,7 +42,7 @@ public class VcpConfiguration {
 
   URI baseUrl;
   AmphoraServiceUri amphoraServiceUri;
-  CastorServiceUri castorServiceUri;
+  CastorServiceInfo castorServiceUri;
   URI ephemeralServiceUrl;
   String oAuth2clientId;
   URI oAuth2CallbackUrl;
@@ -74,7 +73,7 @@ public class VcpConfiguration {
               MessageFormat.format(
                   MESSAGES.getString("configuration.request.vcp.castor-service-url"),
                   getActualCastorServiceUri())));
-      castorServiceUri = new CastorServiceUri(readOrDefault(getActualCastorServiceUri()));
+      castorServiceUri = new CastorServiceInfo(readOrDefault(getActualCastorServiceUri()));
       System.out.print(
           String.format(
               "\t%s",
@@ -117,7 +116,7 @@ public class VcpConfiguration {
       amphoraServiceUri =
           new AmphoraServiceUri(MessageFormat.format(AMPHORA_URL_FORMAT, baseUrl.toString()));
       castorServiceUri =
-          new CastorServiceUri(MessageFormat.format(CASTOR_URL_FORMAT, baseUrl.toString()));
+          new CastorServiceInfo(MessageFormat.format(CASTOR_URL_FORMAT, baseUrl.toString()));
       ephemeralServiceUrl =
           URI.create(MessageFormat.format(EPHEMERAL_URL_FORMAT, baseUrl.toString()));
     }
@@ -144,9 +143,9 @@ public class VcpConfiguration {
     this.amphoraServiceUri = new AmphoraServiceUri(amphoraServiceAddress);
   }
 
-  public CastorServiceUri getCastorServiceUri() {
+  public CastorServiceInfo getCastorServiceUri() {
     return System.getenv(MessageFormat.format(CASTOR_URL_ENV_KEY_FORMAT, providerNumber)) != null
-        ? new CastorServiceUri(
+        ? new CastorServiceInfo(
             System.getenv(MessageFormat.format(CASTOR_URL_ENV_KEY_FORMAT, providerNumber)))
         : castorServiceUri;
   }
@@ -158,7 +157,7 @@ public class VcpConfiguration {
 
   @JsonProperty(value = "castorServiceUrl", required = true, index = 13)
   private void setCastorServiceUri(String castorServiceAddress) {
-    this.castorServiceUri = new CastorServiceUri(castorServiceAddress);
+    this.castorServiceUri = new CastorServiceInfo(castorServiceAddress);
   }
 
   public URI getEphemeralServiceUrl() {

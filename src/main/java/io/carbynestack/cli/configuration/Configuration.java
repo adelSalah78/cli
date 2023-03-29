@@ -73,6 +73,9 @@ public class Configuration {
   @JsonProperty(required = true, index = 6)
   private VcpConfiguration[] providers;
 
+  @JsonProperty(required = true, index = 7)
+  private String certificateFilePath;
+
   Configuration() {
     providers = new VcpConfiguration[] {new VcpConfiguration(1), new VcpConfiguration(2)};
   }
@@ -225,6 +228,11 @@ public class Configuration {
   @JsonProperty(value = "noSslValidation", required = true, index = 4)
   public boolean isActualNoSslValidation() {
     return noSslValidation;
+  }
+
+  @JsonProperty(value = "certificateFilePath", required = true, index = 7)
+  public String getCertificateFilePath() {
+    return certificateFilePath;
   }
 
   public List<Path> getTrustedCertificates() {

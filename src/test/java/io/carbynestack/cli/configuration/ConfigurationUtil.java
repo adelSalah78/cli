@@ -7,7 +7,7 @@
 package io.carbynestack.cli.configuration;
 
 import io.carbynestack.amphora.common.AmphoraServiceUri;
-import io.carbynestack.castor.common.CastorServiceUri;
+import io.carbynestack.castor.common.CastorServiceInfo;
 import java.net.URI;
 import java.util.UUID;
 import lombok.SneakyThrows;
@@ -24,7 +24,7 @@ public class ConfigurationUtil {
     configuration.getProvider(1).amphoraServiceUri =
         new AmphoraServiceUri(String.format("%s/amphora", vcp1BaseUrl));
     configuration.getProvider(1).castorServiceUri =
-        new CastorServiceUri(String.format("%s/castor", vcp1BaseUrl));
+        new CastorServiceInfo(String.format("%s/castor", vcp1BaseUrl));
     configuration.getProvider(1).ephemeralServiceUrl = URI.create(String.format("%s", vcp1BaseUrl));
     configuration.getProvider(1).oAuth2clientId = UUID.randomUUID().toString();
     configuration.getProvider(1).oAuth2CallbackUrl = URI.create("http://localhost/vcp-1");
@@ -32,7 +32,7 @@ public class ConfigurationUtil {
     configuration.getProvider(2).amphoraServiceUri =
         new AmphoraServiceUri(String.format("%s/amphora", vcp2BaseUrl));
     configuration.getProvider(2).castorServiceUri =
-        new CastorServiceUri(String.format("%s/castor", vcp2BaseUrl));
+        new CastorServiceInfo(String.format("%s/castor", vcp2BaseUrl));
     configuration.getProvider(2).ephemeralServiceUrl = URI.create(String.format("%s", vcp2BaseUrl));
     configuration.getProvider(2).oAuth2clientId = UUID.randomUUID().toString();
     configuration.getProvider(2).oAuth2CallbackUrl = URI.create("http://localhost/vcp-2");

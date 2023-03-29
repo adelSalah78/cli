@@ -10,7 +10,7 @@ import io.carbynestack.castor.client.download.CastorIntraVcpClient;
 import io.carbynestack.castor.client.download.DefaultCastorIntraVcpClient;
 import io.carbynestack.castor.client.upload.CastorUploadClient;
 import io.carbynestack.castor.client.upload.DefaultCastorUploadClient;
-import io.carbynestack.castor.common.BearerTokenProvider;
+import io.carbynestack.castor.common.CastorServiceInfo;
 import io.carbynestack.cli.CsClientCliCommandRunner;
 import io.carbynestack.cli.client.castor.CastorClientCli;
 import io.carbynestack.cli.client.castor.config.CastorClientCliCommandConfig;
@@ -24,9 +24,6 @@ import io.carbynestack.cli.login.VcpTokenStore;
 import io.carbynestack.cli.util.KeyStoreUtil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -51,32 +48,17 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
             .getOrElse(
                 Try.of(
                     () -> {
-                        String[] address_port = vcpConfiguration.getCastorServiceUri().getGrpcServiceUri().split(":");
-                        String address = address_port[0];
-                        String port = address_port[1];
+                        String[] addressPort = vcpConfiguration.getCastorServiceUri().getGrpcServiceUri().split(":");
+                        String address = addressPort[0];
+                        String port = addressPort[1];
                       DefaultCastorUploadClient.Builder builder =
                           DefaultCastorUploadClient.builder(
                               address,
                                   port);
-                      for (File certificateFile :
-                          configuration.getTrustedCertificates().stream()
-                              .map(Path::toFile)
-                              .collect(Collectors.toList())) {
-                        builder.withTrustedCertificate(certificateFile);
-                      }
-                      if (configuration.isNoSslValidation()) {
-                        builder.withoutSslCertificateValidation();
-                      }
-                      token
-                          .map(
-                              t ->
-                                  BearerTokenProvider.builder()
-                                      .bearerToken(
-                                          vcpConfiguration.getCastorServiceUri(),
-                                          t.getAccessToken())
-                                      .build())
-                          .peek(builder::withBearerTokenProvider);
-                      return builder.build();
+                      if(configuration.isNoSslValidation())
+                        return builder.build();
+                      else
+                          return builder.withCertificate(configuration.getCertificateFilePath()).build();
                     }))
             .getOrElseThrow(
                 exception ->
@@ -89,22 +71,27 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
             .getOrElse(
                 Try.of(
                     () -> {
+                        CastorServiceInfo castorServiceInfo = vcpConfiguration.getCastorServiceUri();
+                        castorServiceInfo.addCertificate(configuration.getCertificateFilePath());
                       DefaultCastorIntraVcpClient.Builder intraVcpClientBuilder =
-                          DefaultCastorIntraVcpClient.builder(vcpConfiguration.getCastorServiceUri().getGrpcServiceUri());
+                          DefaultCastorIntraVcpClient.builder(castorServiceInfo);
                       KeyStoreUtil.tempKeyStoreForPems(configuration.getTrustedCertificates())
                           .peek(intraVcpClientBuilder::withTrustedCertificate);
                       if (configuration.isNoSslValidation()) {
                         intraVcpClientBuilder.withoutSslCertificateValidation();
                       }
-                      token
-                          .map(
-                              t ->
-                                  BearerTokenProvider.builder()
-                                      .bearerToken(
-                                          vcpConfiguration.getCastorServiceUri(),
-                                          t.getAccessToken())
-                                      .build())
-                          .peek(intraVcpClientBuilder::withBearerTokenProvider);
+                      else{
+                          intraVcpClientBuilder.withTrustedCertificate(castorServiceInfo.getCertificatePath());
+                      }
+//                      token
+//                          .map(
+//                              t ->
+//                                  BearerTokenProvider.builder()
+//                                      .bearerToken(
+//                                          vcpConfiguration.getCastorServiceUri(),
+//                                          t.getAccessToken())
+//                                      .build())
+//                          .peek(intraVcpClientBuilder::withBearerTokenProvider);
                       return intraVcpClientBuilder.build();
                     }))
             .getOrElseThrow(
