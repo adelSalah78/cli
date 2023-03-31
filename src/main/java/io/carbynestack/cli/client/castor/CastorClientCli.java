@@ -25,25 +25,23 @@ public class CastorClientCli extends CsClientCli {
   public CastorClientCli(
       CastorClientCliConfig config,
       boolean debug,
-      Option<CastorUploadClientFactory> uploadClientFactory,
-      Option<CastorIntraVcpClientFactory> telemetryClientFactory) {
+      Option<CastorIntraVcpClientFactory> castorIntraClientFactory) {
     super(config, debug);
     Arrays.asList(
             new CsClientCliCommand(
-                new UploadTupleCastorClientCliCommandConfig(
-                    uploadClientFactory, telemetryClientFactory),
+                new UploadTupleCastorClientCliCommandConfig(castorIntraClientFactory),
                 UploadTupleCastorClientCliCommandRunner.class),
             new CsClientCliCommand(
-                new GetCastorTelemetryCliCommandConfig(uploadClientFactory, telemetryClientFactory),
+                new GetCastorTelemetryCliCommandConfig(castorIntraClientFactory),
                 GetCastorTelemetryCliCommandRunner.class),
             new CsClientCliCommand(
                 new ActivateChunkCastorClientCliCommandConfig(
-                    uploadClientFactory, telemetryClientFactory),
+                        castorIntraClientFactory),
                 ActivateChunkCastorClientCliCommandRunner.class))
         .forEach(this::addCommand);
   }
 
   public CastorClientCli(CastorClientCliConfig config, boolean debug) {
-    this(config, debug, Option.none(), Option.none());
+    this(config, debug, Option.none());
   }
 }

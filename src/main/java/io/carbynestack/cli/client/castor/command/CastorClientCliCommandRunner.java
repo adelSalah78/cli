@@ -8,8 +8,6 @@ package io.carbynestack.cli.client.castor.command;
 
 import io.carbynestack.castor.client.download.CastorIntraVcpClient;
 import io.carbynestack.castor.client.download.DefaultCastorIntraVcpClient;
-import io.carbynestack.castor.client.upload.CastorUploadClient;
-import io.carbynestack.castor.client.upload.DefaultCastorUploadClient;
 import io.carbynestack.castor.common.CastorServiceInfo;
 import io.carbynestack.cli.CsClientCliCommandRunner;
 import io.carbynestack.cli.client.castor.CastorClientCli;
@@ -30,8 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConfig>
     extends CsClientCliCommandRunner<T> {
   static final long CASTOR_COMMUNICATION_TIMEOUT = 10000L;
-
-  CastorUploadClient castorUploadClient;
   CastorIntraVcpClient castorIntraVcpClient;
 
   CastorClientCliCommandRunner(T config)
@@ -41,29 +37,6 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
     Configuration configuration = Configuration.getInstance();
     VcpConfiguration vcpConfiguration = configuration.getProvider(config.getId());
     Option<VcpToken> token = getVcpToken(vcpConfiguration);
-    castorUploadClient =
-        config
-            .getCustomUploadClientFactory()
-            .map(factory -> Try.of(factory::create))
-            .getOrElse(
-                Try.of(
-                    () -> {
-                        String[] addressPort = vcpConfiguration.getCastorServiceUri().getGrpcServiceUri().split(":");
-                        String address = addressPort[0];
-                        String port = addressPort[1];
-                      DefaultCastorUploadClient.Builder builder =
-                          DefaultCastorUploadClient.builder(
-                              address,
-                                  port);
-                      if(configuration.isNoSslValidation())
-                        return builder.build();
-                      else
-                          return builder.withCertificate(configuration.getCertificateFilePath()).build();
-                    }))
-            .getOrElseThrow(
-                exception ->
-                    new CsCliRunnerException(
-                        getMessages().getString("client-instantiation-failed"), exception));
     castorIntraVcpClient =
         config
             .getCustomIntraVcpClientFactory()

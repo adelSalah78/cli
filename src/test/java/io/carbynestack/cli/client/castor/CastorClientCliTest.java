@@ -14,7 +14,6 @@ import static org.mockito.Mockito.*;
 
 import com.beust.jcommander.JCommander;
 import io.carbynestack.castor.client.download.CastorIntraVcpClient;
-import io.carbynestack.castor.client.upload.CastorUploadClient;
 import io.carbynestack.castor.common.entities.TelemetryData;
 import io.carbynestack.castor.common.entities.TupleChunk;
 import io.carbynestack.castor.common.entities.TupleType;
@@ -55,9 +54,7 @@ public class CastorClientCliTest {
   protected static final String TUPLE_FILE_PATH =
       CastorClientCliTest.class.getClassLoader().getResource(TEST_TRIPLE_FILE_NAME).getPath();
   private final ResourceBundle csCliMessages = ResourceBundle.getBundle(CS_CLI_MESSAGE_BUNDLE);
-
-  @Mock private CastorUploadClient castorUploadClientMock;
-  @Mock private CastorIntraVcpClient castorInterVcpClientMock;
+  @Mock private CastorIntraVcpClient castorIntraVcpClientMock;
 
   @Rule public TemporaryConfiguration temporaryConfiguration = new TemporaryConfiguration();
   @Rule public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
@@ -68,18 +65,16 @@ public class CastorClientCliTest {
     return new CastorClientCli(
         config,
         false,
-        Option.some(() -> castorUploadClientMock),
-        Option.some(() -> castorInterVcpClientMock));
+        Option.some(() -> castorIntraVcpClientMock));
   }
 
   private CastorClientCli getCliWithFactoriesAndArgs(
-      CastorUploadClientFactory uploadClientFactory,
       CastorIntraVcpClientFactory intraVcpClientFactory,
       String... args) {
     CastorClientCliConfig config = new CastorClientCliConfig();
     JCommander.newBuilder().addObject(config).build().parse(args);
     return new CastorClientCli(
-        config, false, Option.of(uploadClientFactory), Option.of(intraVcpClientFactory));
+        config, false, Option.of(intraVcpClientFactory));
   }
 
   @Test
@@ -163,7 +158,7 @@ public class CastorClientCliTest {
   public void uploadTuplesSuccessTest()
       throws CsCliRunnerException, CsCliException, CsCliLoginException {
     UUID chunkId = UUID.randomUUID();
-    when(castorUploadClientMock.uploadTupleChunk(any())).thenReturn(true);
+    when(castorIntraVcpClientMock.uploadTupleChunk(any())).thenReturn(true);
     getCliWithArgs(
             UploadTupleCastorClientCliCommandConfig.COMMAND_NAME,
             "-t",
@@ -175,7 +170,7 @@ public class CastorClientCliTest {
             "1")
         .parse();
     ArgumentCaptor<TupleChunk> tupleChunkArgumentCaptor = ArgumentCaptor.forClass(TupleChunk.class);
-    verify(castorUploadClientMock, times(1)).uploadTupleChunk(tupleChunkArgumentCaptor.capture());
+    verify(castorIntraVcpClientMock, times(1)).uploadTupleChunk(tupleChunkArgumentCaptor.capture());
     TupleChunk capturedChunk = tupleChunkArgumentCaptor.getValue();
     Assert.assertNotNull(capturedChunk);
     Assert.assertEquals(chunkId, capturedChunk.getChunkId());
@@ -185,7 +180,7 @@ public class CastorClientCliTest {
   @Test
   public void getTelemetryConnectionRefusedTest() {
     CastorClientException expectedCause = new CastorClientException("Connection refused");
-    when(castorInterVcpClientMock.getTelemetryData()).thenThrow(expectedCause);
+    when(castorIntraVcpClientMock.getTelemetryData()).thenThrow(expectedCause);
     CsCliRunnerException actualException =
         assertThrows(
             CsCliRunnerException.class,
@@ -200,7 +195,7 @@ public class CastorClientCliTest {
   public void getTelemetryWithIntervalSuccessTest() {
     Duration interval = Duration.ofSeconds(42);
     TelemetryData telemetryData = new TelemetryData(Collections.EMPTY_LIST, interval.toMillis());
-    when(castorInterVcpClientMock.getTelemetryData(interval.getSeconds()))
+    when(castorIntraVcpClientMock.getTelemetryData(interval.getSeconds()))
         .thenReturn(telemetryData);
     getCliWithArgs(
             GetCastorTelemetryCliCommandConfig.COMMAND_NAME,
@@ -209,7 +204,7 @@ public class CastorClientCliTest {
             "1")
         .parse();
     ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(castorInterVcpClientMock, times(1)).getTelemetryData(longArgumentCaptor.capture());
+    verify(castorIntraVcpClientMock, times(1)).getTelemetryData(longArgumentCaptor.capture());
     Assert.assertEquals(interval.getSeconds(), longArgumentCaptor.getValue().longValue());
     Assert.assertThat(
         systemOutRule.getLog(),
@@ -249,7 +244,7 @@ public class CastorClientCliTest {
             ActivateChunkCastorClientCliCommandConfig.COMMAND_NAME, "-i", chunkId.toString(), "1")
         .parse();
     ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-    verify(castorUploadClientMock, times(1)).activateTupleChunk(uuidArgumentCaptor.capture());
+    verify(castorIntraVcpClientMock, times(1)).activateTupleChunk(uuidArgumentCaptor.capture());
     Assert.assertEquals(chunkId, uuidArgumentCaptor.getValue());
   }
 }

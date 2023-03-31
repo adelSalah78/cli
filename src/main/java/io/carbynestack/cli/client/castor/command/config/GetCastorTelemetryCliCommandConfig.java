@@ -11,7 +11,6 @@ import static io.carbynestack.cli.client.castor.CastorClientCli.*;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import io.carbynestack.cli.client.castor.CastorIntraVcpClientFactory;
-import io.carbynestack.cli.client.castor.CastorUploadClientFactory;
 import io.carbynestack.cli.client.castor.config.CastorClientCliCommandConfig;
 import io.vavr.control.Option;
 
@@ -27,9 +26,8 @@ public class GetCastorTelemetryCliCommandConfig extends CastorClientCliCommandCo
   private String interval;
 
   public GetCastorTelemetryCliCommandConfig(
-      Option<CastorUploadClientFactory> customUploadClientFactory,
-      Option<CastorIntraVcpClientFactory> customTelemetryClientFactory) {
-    super(customUploadClientFactory, customTelemetryClientFactory);
+      Option<CastorIntraVcpClientFactory> castorIntraClientFactory) {
+    super(castorIntraClientFactory);
   }
 
   public String getInterval() {

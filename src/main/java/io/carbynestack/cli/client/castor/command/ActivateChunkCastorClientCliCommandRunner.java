@@ -26,7 +26,7 @@ public class ActivateChunkCastorClientCliCommandRunner
   public void run() throws CsCliRunnerException {
     try {
       log.debug(String.format("Activating tuple chunk #%s...", getConfig().getChunkId()));
-      castorUploadClient.activateTupleChunk(getConfig().getChunkId());
+      castorIntraVcpClient.activateTupleChunk(getConfig().getChunkId());
       log.error(getMessages().getString("activate.log.success"));
       System.out.println(getMessages().getString("activate.log.success"));
 

@@ -12,7 +12,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import io.carbynestack.castor.common.entities.TupleType;
 import io.carbynestack.cli.client.castor.CastorIntraVcpClientFactory;
-import io.carbynestack.cli.client.castor.CastorUploadClientFactory;
 import io.carbynestack.cli.client.castor.config.CastorClientCliCommandConfig;
 import io.carbynestack.cli.converter.UUIDTypeConverter;
 import io.vavr.control.Option;
@@ -32,9 +31,8 @@ public class UploadTupleCastorClientCliCommandConfig extends CastorClientCliComm
   private File tupleFile;
 
   public UploadTupleCastorClientCliCommandConfig(
-      Option<CastorUploadClientFactory> customUploadClientFactory,
-      Option<CastorIntraVcpClientFactory> customTelemetryClientFactory) {
-    super(customUploadClientFactory, customTelemetryClientFactory);
+      Option<CastorIntraVcpClientFactory> castorIntraClientFactory) {
+    super(castorIntraClientFactory);
   }
 
   public File getTupleFile() {

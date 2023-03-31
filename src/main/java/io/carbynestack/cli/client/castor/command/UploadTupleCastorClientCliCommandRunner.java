@@ -41,7 +41,7 @@ public class UploadTupleCastorClientCliCommandRunner
                 String.format(
                     "Uploading %d tuples to chunk #%s...",
                     chunk.getNumberOfTuples(), chunk.getChunkId()));
-            if (castorUploadClient.uploadTupleChunk(chunk)) {
+            if (castorIntraVcpClient.uploadTupleChunk(chunk)) {
               log.debug(getMessages().getString("upload.log.success"));
               System.out.println(getMessages().getString("upload.log.success"));
               return null;
