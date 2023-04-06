@@ -8,6 +8,7 @@ package io.carbynestack.cli.client.castor.command;
 
 import io.carbynestack.castor.client.download.CastorIntraVcpClient;
 import io.carbynestack.castor.client.download.DefaultCastorIntraVcpClient;
+import io.carbynestack.castor.common.BearerTokenProvider;
 import io.carbynestack.castor.common.CastorServiceInfo;
 import io.carbynestack.cli.CsClientCliCommandRunner;
 import io.carbynestack.cli.client.castor.CastorClientCli;
@@ -23,6 +24,8 @@ import io.carbynestack.cli.util.KeyStoreUtil;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.File;
 
 @Slf4j
 abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConfig>
@@ -45,7 +48,6 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
                 Try.of(
                     () -> {
                         CastorServiceInfo castorServiceInfo = vcpConfiguration.getCastorServiceUri();
-                        castorServiceInfo.addCertificate(configuration.getCertificateFilePath());
                       DefaultCastorIntraVcpClient.Builder intraVcpClientBuilder =
                           DefaultCastorIntraVcpClient.builder(castorServiceInfo);
                       KeyStoreUtil.tempKeyStoreForPems(configuration.getTrustedCertificates())
@@ -54,17 +56,17 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
                         intraVcpClientBuilder.withoutSslCertificateValidation();
                       }
                       else{
-                          intraVcpClientBuilder.withTrustedCertificate(castorServiceInfo.getCertificatePath());
+                          intraVcpClientBuilder.withTrustedCertificate(new File(configuration.getCertificateFilePath()));
                       }
-//                      token
-//                          .map(
-//                              t ->
-//                                  BearerTokenProvider.builder()
-//                                      .bearerToken(
-//                                          vcpConfiguration.getCastorServiceUri(),
-//                                          t.getAccessToken())
-//                                      .build())
-//                          .peek(intraVcpClientBuilder::withBearerTokenProvider);
+                      token
+                          .map(
+                              t ->
+                                  BearerTokenProvider.builder()
+                                      .bearerToken(
+                                          vcpConfiguration.getCastorServiceUri().getGrpcServiceUri(),
+                                          t.getAccessToken())
+                                      .build())
+                          .peek(intraVcpClientBuilder::withBearerTokenProvider);
                       return intraVcpClientBuilder.build();
                     }))
             .getOrElseThrow(
