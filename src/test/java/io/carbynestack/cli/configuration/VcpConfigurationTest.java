@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
 import io.carbynestack.amphora.common.AmphoraServiceUri;
-import io.carbynestack.castor.common.CastorServiceInfo;
 import io.carbynestack.cli.exceptions.CsCliConfigurationException;
 import java.net.URI;
 import java.text.MessageFormat;
@@ -54,8 +53,7 @@ public class VcpConfigurationTest {
     environmentVariables.set(
         MessageFormat.format(VcpConfiguration.CASTOR_URL_ENV_KEY_FORMAT, 1), expectedCasorUrl);
     Configuration configuration = ConfigurationUtil.getConfiguration();
-    assertEquals(
-        new CastorServiceInfo(expectedCasorUrl), configuration.getProvider(1).getCastorServiceUri());
+    assertEquals(expectedCasorUrl, configuration.getProvider(1).getCastorServiceUri());
   }
 
   @Test
@@ -120,7 +118,7 @@ public class VcpConfigurationTest {
                 MESSAGES.getString("configuration.request.vcp.oauth2-callback-url"), "")));
     assertEquals(
         new AmphoraServiceUri(expectedAmphoraUrl), vcpConfiguration.getAmphoraServiceUri());
-    assertEquals(new CastorServiceInfo(expectedCasorUrl), vcpConfiguration.getCastorServiceUri());
+    assertEquals(expectedCasorUrl, vcpConfiguration.getCastorServiceUri());
     assertEquals(URI.create(expectedEphemeralUrl), vcpConfiguration.getEphemeralServiceUrl());
     assertEquals(expectedOAuth2CliendId, vcpConfiguration.getOAuth2ClientId());
     assertEquals(URI.create(expectedOAuth2CallbackUrl), vcpConfiguration.getOAuth2CallbackUrl());
@@ -140,8 +138,7 @@ public class VcpConfigurationTest {
             MessageFormat.format(VcpConfiguration.AMPHORA_URL_FORMAT, expectedBaseUrl)),
         vcpConfiguration.getAmphoraServiceUri());
     assertEquals(
-        new CastorServiceInfo(
-            MessageFormat.format(VcpConfiguration.CASTOR_URL_FORMAT, expectedBaseUrl)),
+            MessageFormat.format(VcpConfiguration.CASTOR_URL_FORMAT, expectedBaseUrl),
         vcpConfiguration.getCastorServiceUri());
     assertEquals(
         URI.create(MessageFormat.format(VcpConfiguration.EPHEMERAL_URL_FORMAT, expectedBaseUrl)),

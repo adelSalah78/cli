@@ -9,7 +9,6 @@ package io.carbynestack.cli.client.castor.command;
 import io.carbynestack.castor.client.download.CastorIntraVcpClient;
 import io.carbynestack.castor.client.download.DefaultCastorIntraVcpClient;
 import io.carbynestack.castor.common.BearerTokenProvider;
-import io.carbynestack.castor.common.CastorServiceInfo;
 import io.carbynestack.cli.CsClientCliCommandRunner;
 import io.carbynestack.cli.client.castor.CastorClientCli;
 import io.carbynestack.cli.client.castor.config.CastorClientCliCommandConfig;
@@ -47,9 +46,9 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
             .getOrElse(
                 Try.of(
                     () -> {
-                        CastorServiceInfo castorServiceInfo = vcpConfiguration.getCastorServiceUri();
+                        String castorServiceUri = vcpConfiguration.getCastorServiceUri();
                       DefaultCastorIntraVcpClient.Builder intraVcpClientBuilder =
-                          DefaultCastorIntraVcpClient.builder(castorServiceInfo);
+                          DefaultCastorIntraVcpClient.builder(castorServiceUri);
                       KeyStoreUtil.tempKeyStoreForPems(configuration.getTrustedCertificates())
                           .peek(intraVcpClientBuilder::withTrustedCertificate);
                       if (configuration.isNoSslValidation()) {
@@ -63,7 +62,7 @@ abstract class CastorClientCliCommandRunner<T extends CastorClientCliCommandConf
                               t ->
                                   BearerTokenProvider.builder()
                                       .bearerToken(
-                                          vcpConfiguration.getCastorServiceUri().getGrpcServiceUri(),
+                                          vcpConfiguration.getCastorServiceUri(),
                                           t.getAccessToken())
                                       .build())
                           .peek(intraVcpClientBuilder::withBearerTokenProvider);
